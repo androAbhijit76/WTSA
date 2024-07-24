@@ -5,133 +5,44 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import { Link } from "react-router-dom";
+import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { registrationAPI } from "../../../Slice/AuthSlice";
-import { useEffect } from "react";
-import { redirect, useNavigate } from "react-router-dom";
 
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+// import { useNavigate } from "react-router-dom";
 
 const defaultTheme = createTheme();
 
 export default function Registration() {
-  const [profile_pic, setProfile_pic] = useState();
-  const { status, directionLogin } = useSelector((state) => state.Auth);
-  const navigate = useNavigate();
+  const { status } = useSelector((state) => state.Auth);
+
   const dispatch = useDispatch();
-  const [user, setUser] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-  });
-  useEffect(() => {
-    if (directionLogin) {
-      navigate(directionLogin);
-      dispatch(redirect(null));
-    }
-  }, [directionLogin, redirect, dispatch]);
 
-  const [error, setError] = React.useState("");
-  const validation = () => {
-    const error = {};
-    if (!user.first_name) {
-      error.first_name = "Fist name is required";
-    }
-    if (!user.last_name) {
-      error.last_name = "Last name is required";
-    }
-    if (!user.email) {
-      error.email = "Email is required";
-    }
-    if (!user.password) {
-      error.password = "Password is required";
-    }
-    if (!profile_pic) {
-      error.profile_pic = "Profile Picture is required";
-    }
-    return error;
-  };
+  const [photo, setPhoto] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError(validation());
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+  const onSubmit = (data) => {
     const formdata = new FormData();
-    formdata.append("first_name", user.first_name);
-    formdata.append("last_name", user.last_name);
-    formdata.append("email", user.email);
-    formdata.append("password", user.password);
-    formdata.append("profile_pic", profile_pic);
+    formdata.append("first_name", data.first_name);
+    formdata.append("last_name", data.last_name);
+    formdata.append("email", data.email);
+    formdata.append("password", data.password);
+    formdata.append("profile_pic", data.profile_pic[0]);
     dispatch(registrationAPI(formdata));
-    setUser("");
-  };
-  let name, value;
-  const handleChange = (e) => {
-    name = e.target.name;
-    value = e.target.value;
-    if (name === "first_name") {
-      if (value.length === 0) {
-        setError({ ...error, first_name: "First name is required" });
-        setUser({ ...user, first_name: "" });
-      } else {
-        setError({ ...error, first_name: "" });
-        setUser({ ...user, first_name: value });
-      }
-    }
-
-    if (name === "last_name") {
-      if (value.length === 0) {
-        setError({ ...error, last_name: "Last name is required" });
-        setUser({ ...user, last_name: "" });
-      } else {
-        setError({ ...error, last_name: "" });
-        setUser({ ...user, last_name: value });
-      }
-    }
-
-    if (name === "email") {
-      if (value.length === 0) {
-        setError({ ...error, email: "Email is required" });
-        setUser({ ...user, email: "" });
-      } else {
-        setError({ ...error, email: "" });
-        setUser({ ...user, email: value });
-      }
-    }
-
-    if (name === "password") {
-      if (value.length === 0) {
-        setError({ ...error, password: "Password is required" });
-        setUser({ ...user, password: "" });
-      } else {
-        setError({ ...error, password: "" });
-        setUser({ ...user, password: value });
-      }
-    }
+    reset();
   };
 
   return (
@@ -154,65 +65,58 @@ export default function Registration() {
           </Typography>
           <Box
             component="form"
-            onSubmit={handleSubmit}
             noValidate
+            onSubmit={handleSubmit(onSubmit)}
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  {...register("first_name", { required: true })}
                   autoComplete="given-name"
                   name="first_name"
                   required
                   fullWidth
-                  id="firstName"
+                  id="first_name"
                   label="First Name"
                   autoFocus
-                  onChange={handleChange}
-                  value={user.first_name}
+                  error={errors.first_name}
+                  helperText={errors.first_name && "First Name is required"}
                 />
-                <span style={{ color: "red" }}>
-                  {""}
-                  {error.first_name}
-                  {""}
-                </span>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  {...register("last_name", { required: true })}
                   required
                   fullWidth
                   id="last_name"
                   label="Last Name"
                   name="last_name"
                   autoComplete="family-name"
-                  onChange={handleChange}
-                  value={user.last_name}
+                  error={errors.last_name}
+                  helperText={errors.last_name && "Last Name is required"}
                 />
-                <span style={{ color: "red" }}>
-                  {""}
-                  {error.last_name}
-                  {""}
-                </span>
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  required
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+                      message: "Invalid email format",
+                    },
+                  })}
+                  label="Your Email"
                   fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  onChange={handleChange}
-                  value={user.email}
+                  margin="normal"
+                  variant="outlined"
+                  error={errors.email}
+                  helperText={errors.email && errors.email.message}
                 />
-                <span style={{ color: "red" }}>
-                  {""}
-                  {error.email}
-                  {""}
-                </span>
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  {...register("password", { required: true })}
                   required
                   fullWidth
                   name="password"
@@ -220,33 +124,33 @@ export default function Registration() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
-                  onChange={handleChange}
-                  value={user.password}
+                  error={errors.password}
+                  helperText={errors.password && "Password is required"}
                 />
-                <span style={{ color: "red", marginLeft: "auto" }}>
-                  {""}
-                  {error.password}
-                  {""}
-                </span>
-                <div>
-                  <input
-                    type="file"
-                    onChange={(e) => setProfile_pic(e.target.files[0])}
-                  />
-                </div>
-                <span style={{ color: "red" }}>
-                  {""}
-                  {error.profile_pic}
-                  {""}
-                </span>
-                {profile_pic && (
-                  <img
-                    src={URL.createObjectURL(profile_pic)}
-                    alt=""
-                    height="180px"
-                  />
-                )}
               </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  {...register("profile_pic", { required: true })}
+                  required
+                  fullWidth
+                  name="profile_pic"
+                  type="file"
+                  id="profile_pic"
+                  error={!photo && errors.profile_pic}
+                  helperText={
+                    !photo &&
+                    errors.profile_pic &&
+                    "Profile Picture is required"
+                  }
+                  onChange={(e) => setPhoto(e.target.files[0])}
+                />
+              </Grid>
+
+              {photo && (
+                <img src={URL.createObjectURL(photo)} alt="" height="180px" />
+              )}
+
               <Grid item xs={12}>
                 <FormControlLabel
                   control={
@@ -277,14 +181,14 @@ export default function Registration() {
             )}
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link to={"/login"} variant="body2">
+                <Link href="#" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
+        {/* <Copyright sx={{ mt: 5 }} /> */}
       </Container>
     </ThemeProvider>
   );

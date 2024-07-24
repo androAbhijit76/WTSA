@@ -113,6 +113,13 @@ const AuthSlice = createSlice({
       });
   },
 });
+
+
+
+
+
+
+
 export const { redirect, redirection, isLogout, checkToken } =
   AuthSlice.actions;
 export default AuthSlice.reducer;
